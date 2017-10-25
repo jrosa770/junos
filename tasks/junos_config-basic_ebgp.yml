@@ -1,0 +1,65 @@
+- name: Backup Current Configuration for {{ inventory_hostname }} {{ ansible_date_time.iso8601 }}
+  junos_config:
+    backup: yes
+    provider: "{{ creds }}"
+#
+# TASK provided by junos_config_l3_interface
+#- name: configure interface {{ junos_interface_name }}
+#  junos_interface:
+#    name: "{{ junos_l3_interface_name}}"
+#    description: "{{ junos_l3_interface_desc }}"
+#    state: "{{ junos_interface_state }}"
+#    active: "{{ junos_interface_active }}"
+#    provider: "{{ creds }}"
+#  when: (junos_l3_interface_agg == 'disabled' and junos_l3_interface_build == 'enabled')
+#
+#- name: configure interface {{ junos_l3_interface_name }} with IP - {{ junos_l3_interface_ipv4 }}
+#  junos_l3_interface:
+#    name: "{{ junos_l3_interface_name }}"
+#    ipv4: "{{ junos_l3_interface_ipv4 }}"
+#    provider: "{{ creds }}"
+#  when: (junos_l3_interface_agg == 'disabled' and junos_l3_interface_build == 'enabled' and junos_l3_dual_stack == 'disabled')
+#
+#- name: configure interface {{ junos_l3_interface_name }} with IP - {{ junos_l3_interface_ipv4 }} and {{ junos_l3_interface_ipv6 }}
+#  junos_l3_interface:
+#    name: "{{ junos_l3_interface_name }}"
+#    ipv4: "{{ junos_l3_interface_ipv4 }}"
+#    ipv6: "{{ junos_l3_interface_ipv6 }}"
+#    provider: "{{ creds }}"
+#  when: (junos_l3_interface_agg == 'disabled' and junos_l3_interface_build == 'enabled' and junos_l3_dual_stack == 'enabled')
+#
+- name: Configuration Information
+  debug: msg="name - {{ junos_l3_interface_name}} | description - {{ junos_l3_interface_desc }} | IP - {{ junos_l3_interface_ipv4 }}"
+  when: junos_l3_interface_ipv4 is defined
+
+- name: Configuration Information
+  debug: msg="name - {{ junos_l3_interface_name}} | description - {{ junos_l3_interface_desc }} | IP - {{ junos_l3_interface_ipv6 }}"
+  when: (junos_l3_interface_ipv4 is defined and junos_l3_interface_ipv6 is defined)
+
+- name: Archive older configs
+  shell: /bin/cp config_partial/basic_ebgp/ebgp-{{ inventory_hostname }}.cfg archive/ebgp-{{ inventory_hostname }}-{{ ansible_date_time.iso8601 }}.cfg
+
+- name: Remove older configs
+  shell: /bin/rm config_partial/basic_ebgp/ebgp-{{ inventory_hostname }}.cfg
+
+- name: Generate Basic eBGP Configuration File
+  template: src=templates/basic_ebgp.j2 dest=config_partial/basic_ebgp/ebgp-{{ inventory_hostname }}.cfg
+  with_items: "{{ basic_ebgp }}"
+
+- name: Merge configuration via napalm_install_config
+  napalm_install_config:
+    hostname: "{{ inventory_hostname }}"
+    config_file: config_partial/basic_ebgp/ebgp-{{ inventory_hostname }}.cfg
+    dev_os: junos
+    replace_config: false
+    commit_changes: True
+    provider: "{{ creds }}"
+
+- name: confirm a previous commit for {{ inventory_hostname }} Timestamp - {{ ansible_date_time.iso8601 }}
+  junos_config:
+    confirm_commit: yes
+    comment: "{{ task_comment }}"
+    provider: "{{ creds }}"
+
+- name: Commit Message
+  debug: msg="{{ task_comment }}"

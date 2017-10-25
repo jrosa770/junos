@@ -1,0 +1,2 @@
+# Banner Playbook
+junos_banner_text: "{{ lookup('file', './config_partial/motd_banner.cfg') }}"

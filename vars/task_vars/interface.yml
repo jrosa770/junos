@@ -1,0 +1,16 @@
+# junos_interface Playbooks
+# If junos_interface_build = enabled, the interface playbook will configure the interface
+# If junos_interface_build = disabled, the playbook will just clear then interface configuration
+junos_interface_build: enabled
+#
+# junos_interface Playbooks
+junos_interface_name: em1
+junos_interface_desc: test-interface
+junos_interface_state: present
+junos_interface_active: True
+# Disable interface configuration option
+junos_interface_w_clear: enabled
+# Option for junos_interface aggregate
+# Playbook will call vars/task_vars/jun_int_aggregate.yml for information
+junos_interface_agg: disabled
+#

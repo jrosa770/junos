@@ -1,0 +1,39 @@
+# junos static route Playbook
+#
+# If Default ***(Use with Care)***
+# junos_static_default: [enabled | disable] - Will enable or disable the default route build playbook routine
+junos_static_default: disabled
+#
+# junos_static_default_build: [enable | disable] 
+# If enable = will configure a default route. 
+# If disable = will not configure a default route after clear (deletes default route from device)
+junos_static_default_build: enabled
+#
+# junos_static_route_build: [enable | disable] 
+# If junos_interface_build = enabled, the interface playbook will configure static route
+# If junos_interface_build = disabled, the playbook will just clear the ip route
+junos_static_route_build: enabled
+#
+# Delete an existing static configuration to an specific destination or default route before running configuration option
+junos_static_route_w_clear: enabled
+#
+# Specific prefix (destination)
+junos_static_route_dest: 192.168.0.128/25
+# Next Hop for specific or default
+junos_static_route_nxt_hop: 172.16.1.2
+junos_static_route_state: present
+junos_static_route_active: True
+# Qualified (backup) Next Hop for specific or default variables
+junos_static_route_qual_active: disabled
+junos_static_route_pref: 5
+junos_static_route_qual_nxt_hop: 172.16.2.2
+junos_static_route_qual_preference: 25
+# Set Command:
+set_syntax_static: 
+  - "set routing-options static route {{ junos_static_route_dest }} next-hop {{ junos_static_route_nxt_hop }}"
+set_syntax_static_qual: 
+  - "set routing-options static route {{ junos_static_route_dest }} next-hop {{ junos_static_route_nxt_hop }} preference {{ junos_static_route_pref }}"
+  - "set routing-options static route {{ junos_static_route_dest }} qualified-next-hop {{ junos_static_route_qual_nxt_hop }} preference {{ junos_static_route_qual_preference }}"
+# Option for junos_l3_interface aggregate
+# Playbook will call vars/task_vars/jun_static_aggregate.yml for information
+junos_static_route_agg: disabled

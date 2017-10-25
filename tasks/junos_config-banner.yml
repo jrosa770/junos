@@ -1,0 +1,24 @@
+- name: remove the motd banner from "{{ inventory_hostname }}"
+  junos_banner:
+    banner: motd
+    state: absent
+    provider: "{{ creds }}"
+
+- name: Configure banner from file for "{{ inventory_hostname }}"
+  junos_banner:
+    banner:  motd
+    text: "Device: {{ inventory_hostname }} {{ junos_banner_text }}"
+    state: present
+    provider: "{{ creds }}"
+
+- name: Applied Banner
+  debug: msg="{{ lookup('file', './config_partial/motd_banner.cfg') }}"
+
+- name: confirm a previous commit for "{{ inventory_hostname }}" Timestamp - "{{ ansible_date_time.iso8601 }}"
+  junos_config:
+    confirm_commit: yes
+    comment: "{{ task_comment }}"
+    provider: "{{ creds }}"
+
+- name: Commit Message
+  debug: msg="{{ task_comment }}"

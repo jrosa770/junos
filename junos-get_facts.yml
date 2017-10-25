@@ -1,0 +1,26 @@
+---
+- hosts: junos
+  gather_facts: no
+  connection: local
+
+  tasks:
+  - name: obtain login credentials
+    include_vars: ../auth/secrets.yml
+
+  - name: define provider
+    set_fact:
+      provider:
+        host: "{{ inventory_hostname }}"
+        username: "{{ creds['username'] }}"
+        password: "{{ creds['password'] }}"
+
+  - name: Checking NETCONF connectivity
+    wait_for: host={{ inventory_hostname }} port=830 timeout=5
+
+  - name: Gather Facts
+    junos_facts:
+      provider: "{{ creds }}"
+    register: junos
+
+  - name: version
+    debug: msg="{{ junos.ansible_facts.ansible_net_model }}"

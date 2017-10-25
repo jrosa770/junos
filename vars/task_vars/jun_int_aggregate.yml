@@ -1,0 +1,8 @@
+# junos_interface Playbooks
+agg_junos_interface_w_clear: enabled
+agg_junos_interface_build: enabled
+#
+agg_junos_interface_name1: em1
+agg_junos_interface_desc1: agg-test-interface-1
+agg_junos_interface_name2: em3
+agg_junos_interface_desc2: agg-test-interface-2

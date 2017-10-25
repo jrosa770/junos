@@ -1,0 +1,38 @@
+- name: Backup Current Configuration for "{{ inventory_hostname }}" "{{ ansible_date_time.iso8601 }}"
+  junos_config:
+    backup: yes
+    provider: "{{ creds }}"
+
+- name: configure new vlan "{{ junos_vlan_id }}" in "{{ inventory_hostname }}"
+  junos_vlan:
+    vlan_name: "{{ junos_vlan_vlan_name }}"
+    vlan_id: "{{ junos_vlan_id }}"
+    name: "{{ junos_vlan_name }}"
+    state: present
+    provider: "{{ creds }}"
+
+- name: activate vlan "{{ junos_vlan_id }}" in "{{ inventory_hostname }}"
+  junos_vlan:
+    vlan_name: "{{ junos_vlan_name }}"
+    active: True
+    provider: "{{ creds }}"
+
+
+- name: activate "{{ junos_interface_name }}" in vlan "{{ junos_vlan_id }}"
+  junos_config:
+    lines: "{{ set_if_vlan }}"
+    comment: update config
+    provider: "{{ creds }}"
+    register: acivate_if
+
+- name: Applied set command for "{{ junos_interface_name }}"
+  debug: msg="{{ set_if_vlan }}"
+
+- name: confirm a previous commit for "{{ inventory_hostname }}" Timestamp - "{{ ansible_date_time.iso8601 }}"
+  junos_config:
+    confirm_commit: yes
+    comment: "{{ task_comment }}"
+    provider: "{{ creds }}"
+
+- name: Commit Message
+  debug: msg="{{ task_comment }}"

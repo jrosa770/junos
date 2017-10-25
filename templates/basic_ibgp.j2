@@ -1,0 +1,17 @@
+set policy-options policy-statement send-direct term 2 from protocol direct
+set policy-options policy-statement send-direct term 2 then accept
+set routing-options autonomous-system {{item.bgp_local_as}}
+{% if item.ibgp_peering_passwd is defined %}
+set security authentication-key-chains key-chain {{item.ibgp_group_name}} key 0 secret {{item.ibgp_peering_passwd}} start-time {{ ansible_date_time.date }}.{{ ansible_date_time.hour }}:{{ ansible_date_time.minute }}
+{% endif %}
+set protocols bgp group {{item.ibgp_group_name}} type internal
+set protocols bgp group {{item.ibgp_group_name}} local-address {{item.ibgp_local_ip}}
+set protocols bgp group {{item.ibgp_group_name}} neighbor {{item.ibgp_peering_ip}}
+set protocols bgp group {{item.ibgp_group_name}} export send-direct
+set protocols bgp group {{item.ibgp_group_name}} description {{item.ibgp_peer_description}}
+{% if item.ibgp_peering_passwd is defined %}
+set protocols bgp group {{item.ibgp_group_name}} authentication-algorithm md5
+{% endif %}
+{% if item.ibgp_initial_state == "disabled" %}
+set protocols bgp group {{item.ibgp_group_name}} neighbor {{item.ibgp_peering_ip}} passive
+{% endif %}

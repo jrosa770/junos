@@ -1,0 +1,16 @@
+set routing-options autonomous-system {{item.bgp_local_as}}
+set routing-options router-id {{item.bgp_local_router_id}}
+{% if item.ebgp_peering_passwd is defined %}
+set security authentication-key-chains key-chain {{item.ebgp_group_name}} key 0 secret {{item.ebgp_peering_passwd}} start-time {{ ansible_date_time.date }}.{{ ansible_date_time.hour }}:{{ ansible_date_time.minute }}
+{% endif %}
+set protocols bgp group {{item.ebgp_group_name}} type external
+set protocols bgp group {{item.ebgp_group_name}} peer-as {{item.ebgp_peer_asn}}
+set protocols bgp group {{item.ebgp_group_name}} neighbor {{item.ebgp_peering_ip}}
+set protocols bgp group {{item.ebgp_group_name}} description {{item.ebgp_peer_description}}_AS_{{item.ebgp_peer_asn}}
+set protocols bgp group {{item.ebgp_group_name}} authentication-key-chain {{item.ebgp_group_name}}
+{% if item.ebgp_peering_passwd is defined %}
+set protocols bgp group {{item.ebgp_group_name}} authentication-algorithm md5
+{% endif %}
+{% if item.ebgp_initial_state == "disabled" %}
+set protocols bgp group {{item.ebgp_group_name}} neighbor {{item.ebgp_peering_ip}} passive
+{% endif %}

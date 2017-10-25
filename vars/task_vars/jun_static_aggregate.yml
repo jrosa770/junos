@@ -1,0 +1,40 @@
+# junos_static Playbooks
+agg_junos_static_w_clear: enabled
+agg_junos_static_build: enabled
+#
+agg_junos_static_dest1: 192.168.1.0/24
+agg_junos_static_nxt_hop1: 172.16.1.1
+# agg_junos_static_route_qual_active1: [enable | disable]
+# If disable will not add a qualified next hop
+agg_junos_static_route_qual_active1: enabled
+agg_junos_static_route_pref1: 5
+agg_junos_static_route_qual_nxt_hop1: 172.16.2.1
+agg_junos_static_route_qual_pref1: 25
+#
+agg_junos_static_dest2: 192.168.2.0/24
+agg_junos_static_nxt_hop2: 172.16.2.1
+# agg_junos_static_route_qual_active2: [enable | disable]
+# If disable will not add a qualified next hop
+agg_junos_static_route_qual_active2: disabled
+agg_junos_static_route_pref2: 5
+agg_junos_static_route_qual_nxt_hop2: 172.16.1.1
+agg_junos_static_route_qual_pref2: 25
+#
+agg_set_syntax_static: 
+  - "set routing-options static route {{ agg_junos_static_dest1 }} next-hop {{ agg_junos_static_nxt_hop1 }}"
+  - "set routing-options static route {{ agg_junos_static_dest2 }} next-hop {{ agg_junos_static_nxt_hop2 }}"
+agg_set_syntax_static_qual: 
+  - "set routing-options static route {{ agg_junos_static_dest1 }} next-hop {{ agg_junos_static_nxt_hop1 }} preference {{ agg_junos_static_route_pref1 }}"
+  - "set routing-options static route {{ agg_junos_static_dest1 }} qualified-next-hop {{ agg_junos_static_route_qual_nxt_hop1 }} preference {{ agg_junos_static_route_qual_pref1 }}"
+  - "set routing-options static route {{ agg_junos_static_dest2 }} next-hop {{ agg_junos_static_nxt_hop2 }} preference {{ agg_junos_static_route_pref2 }}"
+  - "set routing-options static route {{ agg_junos_static_dest2 }} qualified-next-hop {{ agg_junos_static_route_qual_nxt_hop2 }} preference {{ agg_junos_static_route_qual_pref2 }}"
+agg_set_syntax_static_qual_mismatch1: 
+  - "set routing-options static route {{ agg_junos_static_dest1 }}"
+  - "set routing-options static route {{ agg_junos_static_dest1 }}"
+  - "set routing-options static route {{ agg_junos_static_dest2 }} next-hop {{ agg_junos_static_nxt_hop2 }} preference {{ agg_junos_static_route_pref2 }}"
+  - "set routing-options static route {{ agg_junos_static_dest2 }} qualified-next-hop {{ agg_junos_static_route_qual_nxt_hop2 }} preference {{ agg_junos_static_route_qual_pref2 }}"
+agg_set_syntax_static_qual_mismatch2: 
+  - "set routing-options static route {{ agg_junos_static_dest1 }} next-hop {{ agg_junos_static_nxt_hop1 }} preference {{ agg_junos_static_route_pref1 }}"
+  - "set routing-options static route {{ agg_junos_static_dest1 }} qualified-next-hop {{ agg_junos_static_route_qual_nxt_hop1 }} preference {{ agg_junos_static_route_qual_pref1 }}"
+  - "set routing-options static route {{ agg_junos_static_dest2 }}"
+  - "set routing-options static route {{ agg_junos_static_dest2 }}"

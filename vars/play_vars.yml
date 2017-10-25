@@ -1,0 +1,132 @@
+---
+# Change Control Information. In not applicable type n_a
+cc_info: CHG123456
+# Assign Task Type
+# Options for Task: config_backup banner system interface l3_interface vlan vlan_if basic_ebgp basic_ibgp static_rt
+task1: system
+#task2: banner
+#
+task_comment: config_commit-{{ cc_info }}_{{ inventory_hostname }}_{{ ansible_date_time.iso8601 }}
+#
+# Banner Playbook
+junos_banner_text: "{{ lookup('file', './config_partial/motd_banner.cfg') }}"
+# junos_system Playbooks
+junos_system_hostname: lab.r1
+junos_system_domain_name: example.net
+dns_dom_1: net.example.net
+dns_dom_2: example.com
+dns_dom_3: net.example.com
+name_server_1: 8.8.8.8
+name_server_2: 208.67.222.222
+name_server_3: 208.67.220.220
+#
+# junos_interface Playbooks
+# If junos_interface_build = enabled, the interface playbook will configure the interface
+# If junos_interface_build = disabled, the playbook will just clear then interface configuration
+junos_interface_build: enabled
+#
+# junos_interface Playbooks
+junos_interface_name: em1
+junos_interface_desc: test-interface
+junos_interface_state: present
+junos_interface_active: True
+# Disable interface configuration option
+junos_interface_w_clear: enabled
+# Option for junos_interface aggregate
+# Playbook will call vars/task_vars/jun_int_aggregate.yml for information
+junos_interface_agg: disabled
+#
+# junos_l3_interface Playbooks
+# If junos_interface_build = enabled, the interface playbook will configure the interface and the IP address
+# If junos_interface_build = disabled, the playbook will just clear then IP interface configuration
+junos_l3_interface_build: enabled
+#
+junos_l3_dual_stack: disabled
+junos_l3_interface_desc: l3-test-1
+junos_l3_interface_name: em1
+junos_l3_interface_ipv4: 172.16.1.1/30
+junos_l3_interface_ipv6: dead:beef:ac10::1:1/64
+# Disable l3_interface configuration option
+junos_l3_interface_w_clear: enabled
+# Option for junos_l3_interface aggregate
+# Playbook will call vars/task_vars/jun_l3_int_aggregate.yml for information
+junos_l3_interface_agg: disabled
+#
+# junos_vlan Playbooks
+junos_vlan_vlan_name: test
+junos_vlan_id: 100
+junos_vlan_name: test-vlan
+junos_vlan_state: present
+junos_vlan_active: True
+# junos_interface + junos_vlan + junos_config Assign interface Playbooks
+set_if_vlan: 
+  - "set vlans {{ junos_vlan_name }} interface {{ junos_interface_name }}"
+# junos basic_ebgp Playbook
+# For interface build the "tasks" variables require:
+# task1: l3_interface
+# task2: basic_ebgp
+# To push just a peering:
+# task1: basic_ebgp
+# #task2: <empty or commented (undefined)>
+basic_ebgp:
+  - {
+bgp_local_as: 65161,
+bgp_local_router_id: 172.16.1.1,
+ebgp_group_name: EBGP_TEST_GROUP,
+ebgp_peer_description: "EBGP_TEST_PEERS_VIA-{{ junos_l3_interface_name }}",
+ebgp_peer_asn: 65000,
+ebgp_peering_ip: 172.16.1.2,
+ebgp_peering_passwd: "Go!Figur3",
+ebgp_initial_state: disabled
+}
+# basic_ibgp Playbook
+basic_ibgp:
+  - {
+bgp_local_as: 65161,
+ibgp_group_name: IBGP_TEST_GROUP,
+ibgp_peer_description: "IBGP_TEST_PEERS",
+# Update source IP for iBGP Peering
+ibgp_local_ip: 172.16.2.1,
+ibgp_peering_ip: 172.16.2.2,
+#ibgp_peering_passwd: "Boy!NamedSu3",
+ibgp_initial_state: enabled
+}
+# junos static route Playbook
+#
+# If Default ***(Use with Care)***
+# junos_static_default: [enabled | disable] - Will enable or disable the default route build playbook routine
+junos_static_default: disabled
+#
+# junos_static_default_build: [enable | disable] 
+# If enable = will configure a default route. 
+# If disable = will not configure a default route after clear (deletes default route from device)
+junos_static_default_build: enabled
+#
+# junos_static_route_build: [enable | disable] 
+# If junos_interface_build = enabled, the interface playbook will configure static route
+# If junos_interface_build = disabled, the playbook will just clear the ip route
+junos_static_route_build: disabled
+#
+# Delete an existing static configuration to an specific destination or default route before running configuration option
+junos_static_route_w_clear: enabled
+#
+# Specific prefix (destination)
+junos_static_route_dest: 192.168.0.128/25
+# Next Hop for specific or default
+junos_static_route_nxt_hop: 172.16.1.2
+junos_static_route_state: present
+junos_static_route_active: True
+# Qualified (backup) Next Hop for specific or default variables
+junos_static_route_qual_active: disabled
+junos_static_route_pref: 5
+junos_static_route_qual_nxt_hop: 172.16.2.2
+junos_static_route_qual_preference: 25
+# Set Command:
+set_syntax_static: 
+  - "set routing-options static route {{ junos_static_route_dest }} next-hop {{ junos_static_route_nxt_hop }}"
+set_syntax_static_qual: 
+  - "set routing-options static route {{ junos_static_route_dest }} next-hop {{ junos_static_route_nxt_hop }} preference {{ junos_static_route_pref }}"
+  - "set routing-options static route {{ junos_static_route_dest }} qualified-next-hop {{ junos_static_route_qual_nxt_hop }} preference {{ junos_static_route_qual_preference }}"
+# Option for junos_l3_interface aggregate
+# Playbook will call vars/task_vars/jun_static_aggregate.yml for information
+junos_static_route_agg: disabled

@@ -1,0 +1,202 @@
+- name: Backup Current Configuration for {{ inventory_hostname }} {{ ansible_date_time.iso8601 }}
+  junos_config:
+    backup: yes
+    provider: "{{ creds }}"
+
+# Single interface tasks
+## Removals - Default Static
+- name: Delete an existing default route configuration
+  junos_static_route:
+    address: 0.0.0.0/0
+    next_hop: "{{ junos_static_route_nxt_hop }}"
+    state: absent
+    provider: "{{ creds }}"
+  when: (junos_static_route_w_clear == 'enabled' and junos_static_default == 'enabled' and junos_static_route_qual_active == 'disabled' and junos_static_route_agg == 'disabled')
+
+- name: Delete an existing default route configuration with backup route
+  junos_static_route:
+    address: 0.0.0.0/0
+    next_hop: "{{ junos_static_route_nxt_hop }}"
+    preference: "{{ junos_static_route_pref }}"
+    qualified_next_hop: "{{ junos_static_route_qual_nxt_hop }}"
+    qualified_preference: "{{ junos_static_route_qual_preference }}"
+    state: absent
+    provider: "{{ creds }}"
+  when: (junos_static_route_w_clear == 'enabled' and junos_static_default == 'enabled' and junos_static_route_qual_active == 'enabled' and junos_static_route_agg == 'disabled')
+
+- name: Delete an existing default route configuration with backup route for non qualified next hop route add
+  junos_static_route:
+    address: 0.0.0.0/0
+    next_hop: "{{ junos_static_route_nxt_hop }}"
+    preference: "{{ junos_static_route_pref }}"
+    qualified_next_hop: "{{ junos_static_route_qual_nxt_hop }}"
+    qualified_preference: "{{ junos_static_route_qual_preference }}"
+    state: absent
+    provider: "{{ creds }}"
+  when: (junos_static_route_w_clear == 'enabled' and junos_static_default == 'enabled' and junos_static_route_qual_active == 'disabled' and junos_static_route_qual_nxt_hop is defined and junos_static_route_agg == 'disabled')
+
+## Additions - Default Static
+- name: Configure a static default route
+  junos_static_route:
+    address: 0.0.0.0/0
+    next_hop: "{{ junos_static_route_nxt_hop }}"
+    state: present
+    active: True
+    provider: "{{ creds }}"
+  when: (junos_static_route_w_clear == 'enabled' and junos_static_default == 'enabled' and junos_static_default_build == 'enable' and junos_static_route_qual_active == 'disabled' and junos_static_route_agg == 'disabled')
+
+- name: Configure a static default route with backup route
+  junos_static_route:
+    address: 0.0.0.0/0
+    next_hop: "{{ junos_static_route_nxt_hop }}"
+    preference: "{{ junos_static_route_pref }}"
+    qualified_next_hop: "{{ junos_static_route_qual_nxt_hop }}"
+    qualified_preference: "{{ junos_static_route_qual_preference }}"
+    state: present
+    active: True
+    provider: "{{ creds }}"
+  when: (junos_static_route_w_clear == 'enabled' and junos_static_default == 'enabled' and junos_static_default_build == 'enable' and junos_static_route_qual_active == 'enabled' and junos_static_route_agg == 'disabled')
+
+## Removals -  Specific Destination Static
+- name: Delete an existing static route configuration for {{ junos_static_route_dest }}
+  junos_static_route:
+    address: "{{ junos_static_route_dest }}"
+    next_hop: "{{ junos_static_route_nxt_hop }}"
+    state: absent
+    provider: "{{ creds }}"
+  when: (junos_static_default == 'disabled' and junos_static_default == 'disabled' and junos_static_route_qual_active == 'disabled' and junos_static_route_agg == 'disabled')
+
+- name: Delete an existing static route configuration for {{ junos_static_route_dest }} with backup route via {{ junos_static_route_qual_nxt_hop }}
+  junos_static_route:
+    address: "{{ junos_static_route_dest }}"
+    next_hop: "{{ junos_static_route_nxt_hop }}"
+    preference: "{{ junos_static_route_pref }}"
+    qualified_next_hop: "{{ junos_static_route_qual_nxt_hop }}"
+    qualified_preference: "{{ junos_static_route_qual_preference }}"
+    state: absent
+    provider: "{{ creds }}"
+  when: (junos_static_default == 'disabled' and junos_static_default == 'disabled' and junos_static_route_qual_active == 'enabled' and junos_static_route_agg == 'disabled')
+
+## Additions -  Specific Destination Static
+- name: Configure and activate static route configuration for {{ junos_static_route_dest }}
+  junos_static_route:
+    address: "{{ junos_static_route_dest }}"
+    next_hop: "{{ junos_static_route_nxt_hop }}"
+    state: "{{ junos_static_route_state }}"
+    active: "{{ junos_static_route_active }}"
+    provider: "{{ creds }}"
+  when: (junos_static_default == 'disabled' and junos_static_route_build == 'enabled' and junos_static_route_qual_active == 'disabled' and junos_static_route_agg == 'disabled')
+
+- name: Configure and activate static route configuration for {{ junos_static_route_dest }} with backup route via {{ junos_static_route_qual_nxt_hop }}
+  junos_static_route:
+    address: "{{ junos_static_route_dest }}"
+    next_hop: "{{ junos_static_route_nxt_hop }}"
+    preference: "{{ junos_static_route_pref }}"
+    qualified_next_hop: "{{ junos_static_route_qual_nxt_hop }}"
+    qualified_preference: "{{ junos_static_route_qual_preference }}"
+    state: "{{ junos_static_route_state }}"
+    active: "{{ junos_static_route_active }}"
+    provider: "{{ creds }}"
+  when: (junos_static_default == 'disabled' and  junos_static_route_build == 'enabled' and junos_static_route_qual_active == 'enabled' and junos_static_route_agg == 'disabled')
+
+## Set Equivalents
+- name: Equivalent in set syntax command
+  debug: msg="{{ set_syntax_static }}"
+  when: (junos_static_route_qual_active == 'disabled' and  junos_static_route_build == 'enabled' and junos_static_route_agg == 'disabled')
+
+- name: Equivalent in set syntax command with qualified next hop
+  debug: msg="{{ set_syntax_static_qual }}"
+  when: (junos_static_route_qual_active == 'enabled' and  junos_static_route_build == 'enabled' and junos_static_route_agg == 'disabled')
+
+# Aggregate tasks
+- name: Multiple interface Addition variables 
+  include_vars: vars/task_vars/jun_static_aggregate.yml
+  when: junos_static_route_agg == 'enabled'
+
+## Removals -  Multiple Specific Destination Static
+- name: Aggregate clear routes
+  junos_static_route:
+    aggregate:
+      - { address: "{{ agg_junos_static_dest1 }}", next_hop: "{{ agg_junos_static_nxt_hop1 }}"}
+      - { address: "{{ agg_junos_static_dest2 }}", next_hop: "{{ agg_junos_static_nxt_hop2 }}"}
+    state: absent
+    provider: "{{ creds }}"
+  when: (junos_static_route_agg == 'enabled' and agg_junos_static_w_clear == 'enabled' and agg_junos_static_route_qual_active1 == 'disabled' and agg_junos_static_route_qual_active2 == 'disabled') 
+  
+- name: Aggregate clear routes with backup route
+  junos_static_route:
+    aggregate:
+      - { address: "{{ agg_junos_static_dest1 }}", next_hop: "{{ agg_junos_static_nxt_hop1 }}", qualified_next_hop: "{{ agg_junos_static_route_qual_nxt_hop1 }}"}
+      - { address: "{{ agg_junos_static_dest2 }}", next_hop: "{{ agg_junos_static_nxt_hop2 }}", qualified_next_hop: "{{ agg_junos_static_route_qual_nxt_hop2 }}"}
+    state: absent
+    provider: "{{ creds }}"
+  when: (junos_static_route_agg == 'enabled' and agg_junos_static_w_clear == 'enabled' and agg_junos_static_route_qual_active1 == 'enabled' and agg_junos_static_route_qual_active2 == 'enabled')or
+        (junos_static_route_agg == 'enabled' and agg_junos_static_w_clear == 'enabled' and agg_junos_static_route_qual_active1 == 'enabled' and agg_junos_static_route_qual_active2 == 'disabled') or
+        (junos_static_route_agg == 'enabled' and agg_junos_static_w_clear == 'enabled' and agg_junos_static_route_qual_active1 == 'disabled' and agg_junos_static_route_qual_active2 == 'enabled')
+
+## Additions -  Multiple Specific Destination Static
+- name: Aggregate add routes
+  junos_static_route:
+    aggregate:
+      - { address: "{{ agg_junos_static_dest1 }}", next_hop: "{{ agg_junos_static_nxt_hop1 }}"}
+      - { address: "{{ agg_junos_static_dest2 }}", next_hop: "{{ agg_junos_static_nxt_hop2 }}"}
+    state: "{{ junos_static_route_state }}"
+    active: "{{ junos_static_route_active }}"
+    provider: "{{ creds }}"
+  when: (junos_static_route_agg == 'enabled' and agg_junos_static_build == 'enabled' and agg_junos_static_route_qual_active1 == 'disabled' and agg_junos_static_route_qual_active2 == 'disabled')
+
+- name: Aggregate add routes with backup route
+  junos_static_route:
+    aggregate:
+      - { address: "{{ agg_junos_static_dest1 }}", next_hop: "{{ agg_junos_static_nxt_hop1 }}", preference: "{{ agg_junos_static_route_pref1 }}", qualified_next_hop: "{{ agg_junos_static_route_qual_nxt_hop1 }}", qualified_preference: "{{ agg_junos_static_route_qual_pref1 }}"}
+      - { address: "{{ agg_junos_static_dest2 }}", next_hop: "{{ agg_junos_static_nxt_hop2 }}", preference: "{{ agg_junos_static_route_pref2 }}", qualified_next_hop: "{{ agg_junos_static_route_qual_nxt_hop2 }}", qualified_preference: "{{ agg_junos_static_route_qual_pref2 }}"}
+    state: "{{ junos_static_route_state }}"
+    active: "{{ junos_static_route_active }}"
+    provider: "{{ creds }}"
+  when: (junos_static_route_agg == 'enabled' and agg_junos_static_build == 'enabled' and agg_junos_static_route_qual_active1 == 'enabled' and agg_junos_static_route_qual_active2 == 'enabled')
+
+- name: Aggregate add routes with backup route
+  junos_static_route:
+    aggregate:
+      - { address: "{{ agg_junos_static_dest1 }}", next_hop: "{{ agg_junos_static_nxt_hop1 }}", preference: "{{ agg_junos_static_route_pref1 }}", qualified_next_hop: "{{ agg_junos_static_route_qual_nxt_hop1 }}", qualified_preference: "{{ agg_junos_static_route_qual_pref1 }}"}
+      - { address: "{{ agg_junos_static_dest2 }}", next_hop: "{{ agg_junos_static_nxt_hop2 }}"}
+    state: "{{ junos_static_route_state }}"
+    active: "{{ junos_static_route_active }}"
+    provider: "{{ creds }}"
+  when: (junos_static_route_agg == 'enabled' and agg_junos_static_w_clear == 'enabled' and agg_junos_static_route_qual_active1 == 'enabled' and agg_junos_static_route_qual_active2 == 'disabled')
+
+- name: Aggregate add routes with backup route
+  junos_static_route:
+    aggregate:
+      - { address: "{{ agg_junos_static_dest1 }}", next_hop: "{{ agg_junos_static_nxt_hop1 }}"}
+      - { address: "{{ agg_junos_static_dest2 }}", next_hop: "{{ agg_junos_static_nxt_hop2 }}", preference: "{{ agg_junos_static_route_pref2 }}", qualified_next_hop: "{{ agg_junos_static_route_qual_nxt_hop2 }}", qualified_preference: "{{ agg_junos_static_route_qual_pref2 }}"}
+    state: "{{ junos_static_route_state }}"
+    active: "{{ junos_static_route_active }}"
+    provider: "{{ creds }}"
+  when: (junos_static_route_agg == 'enabled' and agg_junos_static_w_clear == 'enabled' and agg_junos_static_route_qual_active1 == 'disabled' and agg_junos_static_route_qual_active2 == 'enabled')
+
+## Set Equivalents
+- name: Aggregate Equivalent in set syntax command
+  debug: msg="{{ agg_set_syntax_static }}"
+  when: (junos_static_route_agg == 'enabled' and agg_junos_static_build == 'enabled' and agg_junos_static_route_qual_active1 == 'disabled' and agg_junos_static_route_qual_active2 == 'disabled')
+
+- name: Aggregate Equivalent in set syntax command
+  debug: msg="{{ agg_set_syntax_static_qual }}"
+  when: (junos_static_route_agg == 'enabled' and agg_junos_static_build == 'enabled' and agg_junos_static_route_qual_active1 == 'enabled' and agg_junos_static_route_qual_active2 == 'enabled')
+
+- name: Aggregate Equivalent in set syntax command
+  debug: msg="{{ agg_set_syntax_static_qual_mismatch1 }}"
+  when: (junos_static_route_agg == 'enabled' and agg_junos_static_w_clear == 'enabled' and agg_junos_static_route_qual_active1 == 'disabled' and agg_junos_static_route_qual_active2 == 'enabled')
+
+- name: Aggregate Equivalent in set syntax command
+  debug: msg="{{ agg_set_syntax_static_qual_mismatch2 }}"
+  when: (junos_static_route_agg == 'enabled' and agg_junos_static_w_clear == 'enabled' and agg_junos_static_route_qual_active1 == 'enabled' and agg_junos_static_route_qual_active2 == 'disabled')
+
+- name: confirm a previous commit for {{ inventory_hostname }} Timestamp - {{ ansible_date_time.iso8601 }}
+  junos_config:
+    confirm_commit: yes
+    comment: "{{ task_comment }}"
+    provider: "{{ creds }}"
+
+- name: Commit Message
+  debug: msg="{{ task_comment }}"

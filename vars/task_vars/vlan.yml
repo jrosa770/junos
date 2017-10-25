@@ -1,0 +1,9 @@
+# junos_vlan Playbooks
+junos_vlan_vlan_name: test
+junos_vlan_id: 100
+junos_vlan_name: test-vlan
+junos_vlan_state: present
+junos_vlan_active: True
+# junos_interface + junos_vlan + junos_config Assign interface Playbooks
+set_if_vlan: 
+  - "set vlans {{ junos_vlan_name }} interface {{ junos_interface_name }}"

@@ -1,0 +1,10 @@
+# junos_system Playbooks
+junos_system_hostname: lab.r1
+junos_system_domain_name: example.net
+dns_dom_1: net.example.net
+dns_dom_2: example.com
+dns_dom_3: net.example.com
+name_server_1: 8.8.8.8
+name_server_2: 208.67.222.222
+name_server_3: 208.67.220.220
+#

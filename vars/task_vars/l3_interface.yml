@@ -1,0 +1,16 @@
+# junos_l3_interface Playbooks
+# If junos_interface_build = enabled, the interface playbook will configure the interface and the IP address
+# If junos_interface_build = disabled, the playbook will just clear then IP interface configuration
+junos_l3_interface_build: enabled
+#
+junos_l3_dual_stack: disabled
+junos_l3_interface_desc: l3-test-1
+junos_l3_interface_name: em1
+junos_l3_interface_ipv4: 172.16.1.1/30
+junos_l3_interface_ipv6: dead:beef:ac10::1:1/64
+# Disable l3_interface configuration option
+junos_l3_interface_w_clear: enabled
+# Option for junos_l3_interface aggregate
+# Playbook will call vars/task_vars/jun_l3_int_aggregate.yml for information
+junos_l3_interface_agg: disabled
+#
